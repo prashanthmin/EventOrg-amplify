@@ -1,0 +1,39 @@
+# This "input" configures a global authorization rule to enable public access to
+# all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
+input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONLY!
+
+# Amplify GraphQL Schema for Event Management App
+
+type Event @model
+           @auth(rules: [
+               { allow: owner, ownerField: "organizerId", operations: [create, update, delete, read] },
+               { allow: groups, groups: ["Admin"], operations: [read, update, delete] }
+           ]) {
+  id: ID!
+  title: String!
+  description: String
+  date: AWSDateTime!
+  location: String
+  organizerId: ID!          # Cognito User Pool sub of the organizer
+  participants: [Participant] @connection(keyName: "byEvent", fields: ["id"])
+}
+
+type Participant @model
+                 @key(name: "byEvent", fields: ["eventId"])
+                 @auth(rules: [
+                   { allow: owner, ownerField: "userId", operations: [read] },
+                   { allow: groups, groups: ["Admin"], operations: [read] }
+                 ]) {
+  id: ID!
+  eventId: ID!               # Foreign key to Event
+  userId: ID!                # Cognito User Pool sub of participant
+  name: String!
+  email: String!
+  role: ParticipantRole!
+}
+
+enum ParticipantRole {
+  ORGANIZER
+  PARTICIPANT
+}
+
