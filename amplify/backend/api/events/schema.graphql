@@ -1,0 +1,11 @@
+type Event @model @auth(rules: [{allow: owner}, {allow: public, operations: [read]}]) {
+  id: ID!
+  title: String!
+  description: String
+  date: AWSDateTime
+  location: String
+  organizer: String
+  participants: [String]
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
